@@ -6,8 +6,8 @@ import { useEffect, useState } from "react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 const NAV_ITEMS = [
-  { href: '/work', label: 'Work' },
-  { href: '/writing', label: 'Writing' },
+  { href: '/work', label: 'work' },
+  { href: '/writing', label: 'thoughts' },
 
 ]
 
