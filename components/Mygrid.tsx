@@ -79,56 +79,52 @@ const generateResponsiveLayouts = (): Layouts => {
 
   const breakpoints = ["lg", "md", "sm", "xs"]
   breakpoints.forEach((breakpoint) => {
-    layouts[breakpoint] = [...fixedLayout]
+    layouts[breakpoint] = [...fixedLayout] // Use original layout unchanged
 
     const hasStars1 = layouts[breakpoint].some((item) => item.i === "stars1")
     if (!hasStars1) {
-      // Add stars1 to the layout - position it where it should be (5th position)
       layouts[breakpoint].push({
         i: "stars1",
-        x: 8, // Position it in the grid
+        x: 8,
         y: 0,
         w: 2,
         h: 2,
         static: true,
       })
     }
-
-    console.log(
-      `[v0] ${breakpoint} layout includes stars1:`,
-      layouts[breakpoint].some((item) => item.i === "stars1"),
-    )
   })
 
-  layouts.xxs = mobileLayoutOrder.map((itemId, index) => {
-    // Find original item or create placeholder
+  let currentY = 0
+  layouts.xxs = mobileLayoutOrder.map((itemId) => {
     const originalItem = fixedLayout.find((item) => item.i === itemId)
 
-    if (originalItem) {
-      return {
-        ...originalItem,
-        x: 0,
-        y: index * 2, // Each item takes 2 rows vertically
-        w: 2, // Full width on mobile (2 cols)
-        h: itemId === "4" ? 2 : 2, // Consistent height
-      }
+    // Calculate dynamic heights based on content type
+    let itemHeight = 2 // default height
+    if (itemId === "8") {
+      // article cell
+      itemHeight = 7 // larger height for article content
+    } else if (itemId === "9") {
+      // map cell
+      itemHeight = 8 // larger height for map
+    } else if (itemId === "4") {
+      // long text content
+      itemHeight = 3
     }
 
-    // Handle stars cells that aren't in original layout
-    return {
+    const layoutItem = {
       i: itemId,
       x: 0,
-      y: index * 2,
+      y: currentY,
       w: 2,
-      h: 2,
+      h: itemHeight,
+      minH: itemHeight,
       static: false,
     }
-  })
 
-  console.log(
-    "[v0] xxs layout includes stars1:",
-    layouts.xxs.some((item) => item.i === "stars1"),
-  )
+    currentY += itemHeight // Compact positioning without extra gaps
+
+    return originalItem ? { ...originalItem, ...layoutItem } : layoutItem
+  })
 
   return layouts
 }
@@ -153,6 +149,7 @@ export default class ResponsiveGridLayout extends React.Component<
   }
 
   intervalId?: NodeJS.Timeout
+  resizeObserver?: ResizeObserver
 
   componentDidMount() {
     this.setState({ mounted: true })
@@ -162,10 +159,21 @@ export default class ResponsiveGridLayout extends React.Component<
         this.setState({ currentTime: new Date() })
       }
     }, 1000)
+
+    if (typeof window !== "undefined" && window.ResizeObserver) {
+      this.resizeObserver = new ResizeObserver(() => {
+        // Force layout recalculation on resize
+        this.forceUpdate()
+      })
+      this.resizeObserver.observe(document.body)
+    }
   }
 
   componentWillUnmount() {
     if (this.intervalId) clearInterval(this.intervalId)
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect()
+    }
   }
 
   private getContentConfig(): Record<string, ContentConfig> {
@@ -284,27 +292,26 @@ export default class ResponsiveGridLayout extends React.Component<
 
       case "article":
         return (
-          <div className={cn("h-full flex flex-col w-full overflow-hidden", isMobile ? "text-xs p-1" : "text-sm p-2")}>
-            <div className={cn("w-full flex items-center mb-2", isMobile ? "h-2/5" : "h-3/5")}>
+          <div
+            className={cn(
+              "h-full flex flex-col w-full overflow-hidden",
+              isMobile ? "text-xs p-3 gap-3" : "text-sm p-2 gap-2",
+            )}
+          >
+            <div className={cn("w-full flex items-center justify-center", isMobile ? "h-32" : "h-52")}>
               <img
                 src={config.image || "/placeholder.svg"}
                 alt="Article cover"
-                className="max-h-full max-w-4/5 object-contain rounded-md"
+                className="max-h-full max-w-full object-cover rounded-md"
               />
             </div>
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <h4
-                className={cn(
-                  "font-bold leading-tight mb-1 overflow-hidden text-ellipsis",
-                  isMobile ? "text-sm" : "text-lg",
-                )}
+            <div className="flex-1 flex flex-col gap-2">
+              <h4 className={cn("font-bold leading-tight", isMobile ? "text-sm" : "text-lg")}>{config.title}</h4>
+              <p className={cn("leading-relaxed flex-1", isMobile ? "text-xs" : "text-sm")}>{config.description}</p>
+              <Link
+                href={config.href}
+                className={cn("underline hover:no-underline transition-all mt-auto", isMobile ? "text-xs" : "text-sm")}
               >
-                {config.title}
-              </h4>
-              <p className={cn("leading-tight mb-2 overflow-hidden line-clamp-3", isMobile ? "text-xs" : "text-xs")}>
-                {config.description}
-              </p>
-              <Link href={config.href} className={cn("underline mt-auto", isMobile ? "text-xs" : "text-xs")}>
                 READ MORE
               </Link>
             </div>
@@ -313,9 +320,20 @@ export default class ResponsiveGridLayout extends React.Component<
 
       case "map":
         return (
-          <div className="relative w-full h-full">
-            <iframe src={config.src} className="w-full h-full block border-none rounded-lg" scrolling="no" title="Leaflet Map" />
-            <div className={cn("absolute bottom-2 left-2   px-2 py-1 rounded", isMobile ? "text-xs" : "text-sm")}>
+          <div className="relative w-full h-full min-h-full">
+            <iframe
+              src={config.src}
+              className="w-full h-full block border-none rounded-lg"
+              scrolling="no"
+              title="Leaflet Map"
+              style={{ minHeight: isMobile ? "200px" : "150px" }}
+            />
+            <div
+              className={cn(
+                "absolute bottom-2 left-2 bg-black/50 text-white px-2 py-1 rounded",
+                isMobile ? "text-xs" : "text-sm",
+              )}
+            >
               mapbox
             </div>
           </div>
@@ -329,21 +347,24 @@ export default class ResponsiveGridLayout extends React.Component<
   generateDOM() {
     const isMobile = this.state.currentBreakpoint === "xxs"
 
-    console.log(`[v0] Current breakpoint: ${this.state.currentBreakpoint}`)
-    console.log(
-      `[v0] Items in current layout:`,
-      this.state.layouts[this.state.currentBreakpoint].map((item) => item.i),
-    )
-
     return _.map(this.state.layouts[this.state.currentBreakpoint], (item) => {
+      const isContentHeavy = item.i === "8" || item.i === "9" // article or map
+
       return (
         <div
           key={item.i}
           className={cn(
-            "border-2  rounded-lg bg-gradient-to-b",
+            "border-2 rounded-lg bg-gradient-to-b transition-all duration-200",
             "flex items-center justify-center overflow-hidden",
-            isMobile ? "p-3 min-w-[280px]" : "p-1",
+            isMobile
+              ? isContentHeavy
+                ? "p-2 min-w-[280px] items-start" // Content-heavy cells align to top
+                : "p-3 min-w-[280px]"
+              : "p-1",
           )}
+          style={{
+            minHeight: isMobile && isContentHeavy ? "auto" : undefined,
+          }}
         >
           {this.renderGridItem(item.i, isMobile)}
         </div>
@@ -352,7 +373,10 @@ export default class ResponsiveGridLayout extends React.Component<
   }
 
   onBreakpointChange = (breakpoint: string) => {
-    this.setState({ currentBreakpoint: breakpoint })
+    this.setState({ currentBreakpoint: breakpoint }, () => {
+      // Trigger a re-render to ensure rapid layout changes
+      this.forceUpdate()
+    })
   }
 
   onLayoutChange = (layout: Layout[], layouts: Layouts) => {
@@ -363,7 +387,7 @@ export default class ResponsiveGridLayout extends React.Component<
     const isMobile = this.state.currentBreakpoint === "xxs"
 
     return (
-      <div className={cn("w-full mx-auto", isMobile ? "p-1 max-w-full" : "p-2")}>
+      <div className={cn("w-full mx-auto transition-all duration-200", isMobile ? "p-1 max-w-full" : "p-2")}>
         <ResponsiveReactGridLayout
           {...this.props}
           layouts={this.state.layouts}
@@ -375,7 +399,7 @@ export default class ResponsiveGridLayout extends React.Component<
           preventCollision={!this.state.compactType}
           isDroppable
           breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-          margin={isMobile ? [5, 5] : [10, 10]}
+          margin={isMobile ? [3, 3] : [10, 10]}
           containerPadding={isMobile ? [5, 0] : [0, 0]}
         >
           {this.generateDOM()}

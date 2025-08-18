@@ -41,14 +41,14 @@ const PROJECTS = [
 const cardData = [
   {
     id: "1",
-    media: "/card1.mp4",
+    media: "/card2.mp4",
     mediaType: "image" as const,
     leftText: "Visual Story",
     rightText: "Motion Design",
   },
   {
     id: "2",
-    media: "/card2.mp4",
+    media: "/card1.mp4",
     mediaType: "video" as const,
     leftText: "3D Types",
     rightText: "Generative Design",
