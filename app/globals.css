@@ -12,6 +12,7 @@
 
 :root {
   --font-inter:  'Segoe UI', 'Roboto', sans-serif;
+  scrollbar-gutter: stable;
 }
 
 * {

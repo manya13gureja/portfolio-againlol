@@ -129,7 +129,7 @@ export function Navigation() {
     <nav className={cn(
       "z-50 transition-all duration-300 ease-out shadow-manya",
       isScrolled
-        ? "fixed left-1/2 -translate-x-1/2 w-full rounded-2xl backdrop-blur-[8px] border border-black/10 shadow-md"
+        ? "fixed left-1/2 -translate-x-1/2 w-full max-w-[960px] rounded-2xl backdrop-blur-[8px] border border-black/10 shadow-md"
         : "absolute left-1/2 -translate-x-1/2 w-full max-w-[960px] bg-transparent"
     )}>
       <div className="px-8 py-6 pb-24">
