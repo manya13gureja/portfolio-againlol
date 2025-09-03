@@ -10,7 +10,7 @@ const articles = [
   {
     date: "Feb 2025",
     href: "/writing/articles",
-    img: "/writing-cover.png",
+    img: "/assets/writing-cover.png",
     title: "Don't Trust the (Design) Process",
     desc: "A reflection on design workflows and why intuition sometimes matters more than the rules."
   }

@@ -1,10 +1,9 @@
 'use client'
 import React from 'react';
-import type { AppProps } from 'next/app'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
-import { Navigation } from '@/components/navigation';
 import dynamic from 'next/dynamic'
+import { TitleAnimator } from '@/components/TitleAnimator';
 
 
 const MyGrid = dynamic(() => import('@/components/Mygrid'), { ssr: false })

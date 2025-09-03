@@ -218,7 +218,7 @@ export default class ResponsiveGridLayout extends React.Component<
         title: "Don't trust the (design) process",
         description:
           "There's a strange trend in design lately, we've stopped designing things and started designing the process of designing them. Let's be real in 2025, we've got to stop romanticising \"process\" like it's the product.",
-        image: "/writing-cover.png",
+        image: "/assets/writing-cover.png",
         href: "/writing",
       },
       "9": {

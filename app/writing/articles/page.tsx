@@ -19,7 +19,7 @@ const ArticlePage: React.FC = () => {
       <section 
         className="h-screen bg-cover bg-center bg-no-repeat relative"
         style={{
-          backgroundImage: `url('/writing-cover.png')`,
+          backgroundImage: `url('/assets/writing-cover.png')`,
         }}
       >
         {/* Optional overlay for better text contrast */}
@@ -357,7 +357,7 @@ const ArticlePage: React.FC = () => {
                   <div className="w-full h-full bg-gradient-to-br from-gray-800 to-black flex items-center justify-center relative">
                   <Link href="/writing/articles/the-invisible-details-of-interaction-design">
                   <img 
-                    src="/upcoming-section.gif" 
+                    src="/assets/upcoming-section.gif" 
                     alt="Design Thinking 101" 
                     className="w-full h-full object-cover cursor-pointer"
                   />

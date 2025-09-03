@@ -30,7 +30,6 @@ export function ProjectItem({
 }) {
   const { start, end } = project.period;
   const isOngoing = !end;
-
   return (
     <Collapsible defaultOpen={project.isExpanded} asChild>
       <div className={className}>

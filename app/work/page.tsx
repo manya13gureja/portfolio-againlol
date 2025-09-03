@@ -3,7 +3,6 @@ import { Navigation } from "@/components/navigation";
 import { PROJECTS } from "@/features/profile/data/project";
 import { Panel, PanelHeader, PanelTitle } from "@/components/Panel";
 import { ProjectItem } from "./project-item";
-
 export default function Projects() {
   return (
     <>
